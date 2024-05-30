@@ -39,12 +39,12 @@ sPR = 24
 NcP = 4.67 # Nitrogen Protein conversion factor
 
 # WDir<-choose.dir() #choose folder of the project (alternatively write path)
-WDir <- "H:/.shortcut-targets-by-id/1KyBOLIX6Yss5hEEQ9-lJ3Q-Jg0LoRIbU/Fermentation study - Giacomo"
+WDir <- "Downloads/Fermentation_BSFL"
 
 ## Import and prepare data ##
 
 # Rearing data
-Data <- read.xlsx(file.path(WDir, "2023_05_30_MainExp/DataExp.xlsx"), sheetName = "Experiment", stringsAsFactors = TRUE)
+Data <- read.xlsx(file.path(WDir, "DataExp.xlsx"), sheetName = "Experiment", stringsAsFactors = TRUE)
 Eliminate <- Data$sample[Data$day==8&Data$survival<0.51] # eliminate replicates with too few larva at the beginning of the Exp
 Data <- subset(Data, sample!=Eliminate)
 dataDay0 <- subset(Data, !duplicated(sample)) # create new rows for the beginning of the experiment, to use in plots
@@ -54,18 +54,18 @@ Data <- rbind(Data,dataDay0) # merge data together
 DataH <- subset(Data, day==8) # only data from Harvest day
 
 # HPLC data
-HPLC <- read.xlsx(file.path(WDir, "2023_05_30_MainExp/LabAnalysis/HPLC_Pharmabiome/HPLC.xlsx"), sheetIndex=1, stringsAsFactors=TRUE)
+HPLC <- read.xlsx(file.path(WDir, "HPLC.xlsx"), sheetIndex=1, stringsAsFactors=TRUE)
 HPLC$int <- interaction(HPLC$treat,HPLC$preserv)
 HPLC$ID <- row.names(HPLC)
 
 # Microbial data
-FileList <- read.xlsx(file.path(WDir, "2023_05_30_MainExp/LabAnalysis/Microbial_Community/Old+New/NamingMicrobialCommunity.xlsx"), sheetIndex=1, stringsAsFactors=TRUE)
+FileList <- read.xlsx(file.path(WDir, "NamingMicrobialCommunity.xlsx"), sheetIndex=1, stringsAsFactors=TRUE)
 
 Files_feed <- subset(FileList, type=="feed") # Pick only files with feedstock data 
 Files_feed <- Files_feed[with(Files_feed, order(day, preserv)),]
 
 for (file in 1:nrow(Files_feed)){ #Build a tree and merge OTUs tables
-  name.file = file.path(WDir, "2023_05_30_MainExp/LabAnalysis/Microbial_Community/Old+New/Raw_Data", as.character(Files_feed$file)[file])
+  name.file = file.path(WDir, "Raw_Data", as.character(Files_feed$file)[file])
   
   d <- read.delim(name.file,sep="\t")
   t <- d[, c("tax_id","lineage")]
@@ -104,9 +104,9 @@ Microb <- merge(df,tree,by=c("OTU"))
 
 # Temperature data
 
-Temp <- read.xlsx(file.path(WDir, "2023_05_30_MainExp/Environmental_Data/TempSubstrate.xlsx"), sheetName = "Sheet1", stringsAsFactors = TRUE)
-Tcontainer <- read.xlsx(file.path(WDir, "2023_05_30_MainExp/Environmental_Data/TempContainer.xlsx"), sheetName = "Sheet1", stringsAsFactors = TRUE)
-Start <- read.xlsx(file.path(WDir, "2023_05_30_MainExp/StartExp.xlsx"), sheetName="Sheet1", stringsAsFactors =TRUE)
+Temp <- read.xlsx(file.path(WDir, "TempSubstrate.xlsx"), sheetName = "Sheet1", stringsAsFactors = TRUE)
+Tcontainer <- read.xlsx(file.path(WDir, "TempContainer.xlsx"), sheetName = "Sheet1", stringsAsFactors = TRUE)
+Start <- read.xlsx(file.path(WDir, "StartExp.xlsx"), sheetName="Sheet1", stringsAsFactors =TRUE)
 Tcontainer$dash = "Dashed"
 
 Tlong <- Temp %>% 
@@ -172,7 +172,7 @@ theme_set(theme_cowplot(font_size = 12) +
             theme(text = element_text(size = 12)))
 
 F1ACE <- cowplot::plot_grid(F1A, F1C, F1E + theme(legend.position = 'none'), legend, ncol = 1, rel_heights = c(1,1,1, .1))
-file_name = paste(WDir,"/Manuscript/Plots/Fig1_ACE.tiff", sep = "")
+file_name = paste(WDir,"/Plots/Fig1_ACE.tiff", sep = "")
 tiff(file_name, units = "mm", width = 91, height = 200, res = 400)
 print(F1ACE)
 dev.off()
@@ -205,7 +205,7 @@ theme_set(theme_cowplot(font_size = 12) +
             theme(text = element_text(size = 12)))
 
 F1BDF <- cowplot::plot_grid(F1B, F1D, F1F + theme(legend.position = 'none'), legend, ncol = 1, rel_heights = c(1,1,1, .1))
-file_name = paste(WDir,"/Manuscript/Plots/Fig1_BDF.tiff", sep = "")
+file_name = paste(WDir,"/Plots/Fig1_BDF.tiff", sep = "")
 tiff(file_name, units = "mm", width = 91, height = 200, res = 400)
 print(F1BDF)
 dev.off()
@@ -246,7 +246,7 @@ Fig2 <- pheatmap(pHPLC, treeheight_row = 0, treeheight_col = 0, angle_col = 315,
                  cluster_cols = FALSE,cluster_rows = FALSE)
 
 
-file_name = paste(WDir,"/Manuscript/Plots/Fig_2.tiff", sep= "")
+file_name = paste(WDir,"/Plots/Fig_2.tiff", sep= "")
 tiff(file_name, units = "mm", width = 182, height = 91, res = 300)
 print(Fig2)
 dev.off()
@@ -285,7 +285,7 @@ F3A <- ggplot(MC_phylum, aes(name, count, fill = factor(Phylum))) +
         panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, size = 1.2), 
         legend.position = "right") + scale_fill_manual(values = micro[1:5])
 
-file_name = paste(WDir, "/Manuscript/Plots/Fig3_A.tiff", sep = "")
+file_name = paste(WDir, "/Plots/Fig3_A.tiff", sep = "")
 tiff(file_name, units = "mm", width = 182, height = 100, res = 400)
 print(F3A)
 dev.off()
@@ -313,7 +313,7 @@ F3B <- ggplot(MC_genus, aes(name, count, fill = factor(Genus))) +
         panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, size = 1.2), 
         legend.position = "right") + scale_fill_manual(values = micro)
 
-file_name = paste(WDir, "/Manuscript/Plots/Fig3_B.tiff", sep = "")
+file_name = paste(WDir, "/Plots/Fig3_B.tiff", sep = "")
 tiff(file_name, units = "mm", width = 182, height = 100, res = 400)
 print(F3B)
 dev.off()
@@ -321,7 +321,7 @@ dev.off()
 # Microbial diversity
 
 Microb_div <- amp_alpha_diversity(MC_counts_F, measure = c("observed","shannon","simpson"), richness = TRUE, rarefy = NULL)
-write.xlsx2(Microb_div, file.path(WDir, "2023_05_30_MainExp/MicrobialDiversity.xlsx") , sheetName = "Sheet1",
+write.xlsx2(Microb_div, file.path(WDir, "MicrobialDiversity.xlsx") , sheetName = "Sheet1",
             col.names = TRUE, row.names = TRUE, append = FALSE)
 
 # Figure 4 - DPCA Metabolites
@@ -347,7 +347,7 @@ DPCA <- ggplot(dpca_HPLC, aes(x = LD1, y = LD2, fill = preserv, shape = preserv)
   scale_fill_manual(values = c("ACD" = AC, "CTR" = WF, "FRM" = IF, "PRE" = PRE), labels = c("ACD" = "AC", "CTR" = "WF", "FRM" = "IF", "PRE" = "Pre"))+
   scale_shape_manual(values = c("ACD" = sAC, "CTR" = sWF, "FRM" = sIF, "PRE" = sPR), labels=c("ACD" = "AC", "CTR" = "WF", "FRM" = "IF", "PRE" = "Pre"))
 
-file_name = paste(WDir,"/Manuscript/Plots/HPCL.pdf", sep="") #Unfortunately, best way I found to make labels legible was to add them with a design software 
+file_name = paste(WDir,"/Plots/HPCL.pdf", sep="") #Unfortunately, best way I found to make labels legible was to add them with a design software 
 pdf(file_name, width=8, height=4.5)
 print(DPCA)
 dev.off()
@@ -356,7 +356,7 @@ dev.off()
 
 ## Larvae NC
 #N&C&F
-NC <- read.xlsx(paste(WDir,"/2023_05_30_MainExp/LabAnalysis/AnimalNutrition/NCLarvae.xlsx", sep=""),sheetIndex = 1) #Load data on larvae nitrogen and carbon content
+NC <- read.xlsx(paste(WDir,"NCLarvae.xlsx", sep=""),sheetIndex = 1) #Load data on larvae nitrogen and carbon content
 NC$int <- interaction(NC$treat,NC$preserv)
 NC$treat <- as.factor(NC$treat)
 
@@ -365,7 +365,7 @@ NCavg<-NC %>% drop_na(number) %>%
   summarise(avg_N = mean(N, na.rm = TRUE), sd_N = sd(N, na.rm = TRUE), avg_C = mean(C, na.rm = TRUE), sd_C = sd(C, na.rm = TRUE),
             avg_DM = mean(DM, na.rm = TRUE), sd_DM = sd(DM, na.rm = TRUE), avg_A = mean(AshDry, na.rm = TRUE),sd_A = sd(AshDry, na.rm = TRUE))
 
-Fat<- read.xlsx(paste(WDir,"/2023_05_30_MainExp/LabAnalysis/Agrolab/LarvaeFat.xlsx", sep=""),sheetIndex = 2) #Load data on larvae fat content
+Fat<- read.xlsx(paste(WDir,"LarvaeFat.xlsx", sep=""),sheetIndex = 2) #Load data on larvae fat content
 Fat$int<- interaction(Fat$treat,Fat$preserv)
 Fat$treat<-as.factor(Fat$treat)       
 
